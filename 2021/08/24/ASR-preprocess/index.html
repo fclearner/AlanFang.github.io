@@ -79,19 +79,20 @@
 
 
 
-<meta name="description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程, 包括预加重、分帧加窗、DFT、FBank等">
+<meta name="description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等">
 <meta name="keywords" content="ASR,Preprocess">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ASR-preprocess">
 <meta property="og:url" content="http://yoursite.com/2021/08/24/ASR-preprocess/index.html">
 <meta property="og:site_name" content="AlanFangBlog">
-<meta property="og:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程, 包括预加重、分帧加窗、DFT、FBank等">
+<meta property="og:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/preprocess_flow.png">
-<meta property="og:updated_time" content="2021-08-24T08:41:15.376Z">
+<meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/mel_filter.png">
+<meta property="og:updated_time" content="2021-08-25T08:42:37.393Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ASR-preprocess">
-<meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程, 包括预加重、分帧加窗、DFT、FBank等">
+<meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等">
 <meta name="twitter:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/preprocess_flow.png">
 
 
@@ -332,9 +333,25 @@
       
 
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;语音信号预处理相关流程, 包括预加重、分帧加窗、DFT、FBank等<br><a id="more"></a></p>
-<h3 id="语音信号提取流程"><a href="#语音信号提取流程" class="headerlink" title="语音信号提取流程"></a>语音信号提取流程</h3><p><img src="/2021/08/24/ASR-preprocess/preprocess_flow.png" alt></p>
-<h4 id="预加重"><a href="#预加重" class="headerlink" title="预加重"></a>预加重</h4><h4 id="分帧加窗"><a href="#分帧加窗" class="headerlink" title="分帧加窗"></a>分帧加窗</h4><h4 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h4><h4 id="FBank"><a href="#FBank" class="headerlink" title="FBank"></a>FBank</h4>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等<br><a id="more"></a></p>
+<h2 id="语音信号提取流程"><a href="#语音信号提取流程" class="headerlink" title="语音信号提取流程"></a>语音信号提取流程</h2><p><img src="/2021/08/24/ASR-preprocess/preprocess_flow.png" alt></p>
+<p>(python代码可参考References部分的博客)</p>
+<h3 id="预加重"><a href="#预加重" class="headerlink" title="预加重"></a>预加重</h3><h4 id="Question-为什么需要预加重？"><a href="#Question-为什么需要预加重？" class="headerlink" title="Question:为什么需要预加重？"></a>Question:为什么需要预加重？</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;提高信号高频部分的能量,高频信号在传递过程中,衰减较快,包含更多的语音特征,n与n-1的变化幅度更大。</p>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;预加重是一个一阶高通滤波器，给定时域输入信号$x[n]$,预加重之后的信号为</p>
+<script type="math/tex; mode=display">y[n] = x[n] - \alpha x[n-1], \alpha \in [0.9, 1.0]</script><p>&nbsp;&nbsp;&nbsp;&nbsp;当信号为低频信号时，x变化较慢，$x[n]$与$x[n-1]$较为接近，低频信号的幅度会被大大抑制，同理，可保证高频信号特征的传递。</p>
+<h3 id="分帧加窗"><a href="#分帧加窗" class="headerlink" title="分帧加窗"></a>分帧加窗</h3><h4 id="Question-为什么需要分帧？"><a href="#Question-为什么需要分帧？" class="headerlink" title="Question:为什么需要分帧？"></a>Question:为什么需要分帧？</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;1、语音信号为非平稳信号，统计属性随时间变化。<br>&nbsp;&nbsp;&nbsp;&nbsp;2、语音信号同时具有短时平稳特性，一个声母/韵母的发音往往持续几十到几百毫秒。<br>&nbsp;&nbsp;&nbsp;&nbsp;3、语音识别以较小发音单元的识别进行，通常为音素、字或字节，需要滑动窗来提取短时片段。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;对于采样率为16kHz的信号，帧长、帧移一般为25ms、10ms，即400和160个采样点<br>&nbsp;&nbsp;&nbsp;&nbsp;帧长是一个窗口的长度，帧移是连续两帧之间重叠的部分(overlap)。</p>
+<h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;分帧的过程，在时域上，即用一个窗函数和原始信号进行相乘:</p>
+<script type="math/tex; mode=display">y[n] = w[n]x[n]</script><p>$w[n]$称为窗函数，常用的窗函数有<br>矩形窗：</p>
+<script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{1,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>汉明窗(Hamming):</p>
+<script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{0.54-0.46\cos\frac{2\pi n}{L} ,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>&nbsp;&nbsp;&nbsp;&nbsp;使用汉明窗:加窗的过程，实际上是在时域上将信号截断，窗函数与信号在时域相乘，就等于对应的频域表示进行卷积(*)，矩形窗主瓣窄，但是旁瓣较大（红色部分），将其与原信号的频域表示进行卷积，就会导致频率泄漏</p>
+<h3 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;将上一步分帧之后的语音帧，通过快速傅里叶变换由时域变换到频域，取DFT系数的模，得到谱特征,在此不做详细描述，可参考下列文章(压箱底系列)<br>&nbsp;&nbsp;&nbsp;&nbsp;DFT: <a href="https://zhuanlan.zhihu.com/p/77347644" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/77347644</a><br>&nbsp;&nbsp;&nbsp;&nbsp;C语言-FFT蝶形运算：<a href="https://zhuanlan.zhihu.com/p/135259438" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/135259438</a><br>&nbsp;&nbsp;&nbsp;&nbsp;傅里叶变换的意义: <a href="https://blog.csdn.net/guyuealian/article/details/72817527" target="_blank" rel="noopener">https://blog.csdn.net/guyuealian/article/details/72817527</a><br>&nbsp;&nbsp;&nbsp;&nbsp;复数的物理意义: <a href="https://www.zhihu.com/question/23234701" target="_blank" rel="noopener">https://www.zhihu.com/question/23234701</a><br>&nbsp;&nbsp;&nbsp;&nbsp;信号频域与时域的区别:<a href="https://www.zhihu.com/question/21817515" target="_blank" rel="noopener">https://www.zhihu.com/question/21817515</a></p>
+<h3 id="FBank"><a href="#FBank" class="headerlink" title="FBank"></a>FBank</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;DFT得到了每个频带上信号的能量，但是人耳对频率的感知不是等间隔的，近似于对数函数</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;将线性频率转换为梅尔频率，梅尔频率和线性频率转换关系</p>
+<script type="math/tex; mode=display">mel(f)=2595\log_{10}(1+\frac{f}{700})</script><p><img src="/2021/08/24/ASR-preprocess/mel_filter.png" alt></p>
+<h3 id="梅尔滤波器组设计"><a href="#梅尔滤波器组设计" class="headerlink" title="梅尔滤波器组设计"></a>梅尔滤波器组设计</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;(1)确定滤波器组个数P<br>&nbsp;&nbsp;&nbsp;&nbsp;(2)根据采样率fs，DFT点数N，滤波器个数P，在梅尔域上等间隔的产生每个滤波器的起始频率、中间频率和截至频率，注意，上一个滤波器的中间频率为下一个滤波器的起始频率（存在overlap）<br>&nbsp;&nbsp;&nbsp;&nbsp;(3)将梅尔域上每个三角滤波器的起始、中间和截止频率转换线性频率域，并对DFT之后的谱特征进行滤波，得到P个滤波器组能量，进行log 操作，得到Fbank特征</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1]《语音信号预处理及python代码实现博客:<br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.cnblogs.com/lxp-never/p/10918590.html#blogTitle7》" target="_blank" rel="noopener">https://www.cnblogs.com/lxp-never/p/10918590.html#blogTitle7》</a></p>
+
       
     </div>
     
@@ -504,7 +521,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#语音信号提取流程"><span class="nav-number">1.1.</span> <span class="nav-text">语音信号提取流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#预加重"><span class="nav-number">1.1.1.</span> <span class="nav-text">预加重</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分帧加窗"><span class="nav-number">1.1.2.</span> <span class="nav-text">分帧加窗</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DFT"><span class="nav-number">1.1.3.</span> <span class="nav-text">DFT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FBank"><span class="nav-number">1.1.4.</span> <span class="nav-text">FBank</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语音信号提取流程"><span class="nav-number">2.</span> <span class="nav-text">语音信号提取流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#预加重"><span class="nav-number">2.1.</span> <span class="nav-text">预加重</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Question-为什么需要预加重？"><span class="nav-number">2.1.1.</span> <span class="nav-text">Question:为什么需要预加重？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理"><span class="nav-number">2.1.2.</span> <span class="nav-text">原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分帧加窗"><span class="nav-number">2.2.</span> <span class="nav-text">分帧加窗</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Question-为什么需要分帧？"><span class="nav-number">2.2.1.</span> <span class="nav-text">Question:为什么需要分帧？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DFT"><span class="nav-number">2.3.</span> <span class="nav-text">DFT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBank"><span class="nav-number">2.4.</span> <span class="nav-text">FBank</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#梅尔滤波器组设计"><span class="nav-number">2.5.</span> <span class="nav-text">梅尔滤波器组设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">3.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
@@ -827,6 +844,26 @@
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 

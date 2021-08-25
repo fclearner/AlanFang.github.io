@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="AlanFangBlog">
 <meta property="og:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CMVN在语音识别中的作用">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2021-08-24T08:41:36.421Z">
+<meta property="og:updated_time" content="2021-08-25T09:12:26.017Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ASR-CMVN">
 <meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CMVN在语音识别中的作用">
@@ -331,6 +331,7 @@
 
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CMVN在语音识别中的作用<br><a id="more"></a></p>
+<h2 id="CMVN"><a href="#CMVN" class="headerlink" title="CMVN"></a>CMVN</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CMVN与数据归一化相似，但CMVN的意义更偏向于对音频数据进行滤波，可提升识别精度。<br>&nbsp;&nbsp;&nbsp;&nbsp;在线的CMVN是基于滑动窗口进行的，会影响语音识别响应时间；feature norm是对所有训练数据进行统计，然后单帧计算<br>&nbsp;&nbsp;&nbsp;&nbsp;因CMVN占用识别响应时间，最新的端到端识别中未使用<br>&nbsp;&nbsp;&nbsp;&nbsp;CMVN详细原理可参考References中的论文[1]</p>
 <h3 id="References"><a href="#References" class="headerlink" title="References"></a>References</h3><p>[1]《Significance of CMVN for Replay Spoof Detection》</p>
 
       
@@ -498,7 +499,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">1.1.</span> <span class="nav-text">References</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMVN"><span class="nav-number">2.</span> <span class="nav-text">CMVN</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#References"><span class="nav-number">2.1.</span> <span class="nav-text">References</span></a></li></ol></li></ol></div>
             
 
           </div>
