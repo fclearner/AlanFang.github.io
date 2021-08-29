@@ -89,7 +89,7 @@
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/preprocess_flow.png">
 <meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/mel_filter.png">
-<meta property="og:updated_time" content="2021-08-25T08:42:37.393Z">
+<meta property="og:updated_time" content="2021-08-29T08:47:48.983Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ASR-preprocess">
 <meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等">
@@ -344,7 +344,7 @@
 <h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;分帧的过程，在时域上，即用一个窗函数和原始信号进行相乘:</p>
 <script type="math/tex; mode=display">y[n] = w[n]x[n]</script><p>$w[n]$称为窗函数，常用的窗函数有<br>矩形窗：</p>
 <script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{1,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>汉明窗(Hamming):</p>
-<script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{0.54-0.46\cos\frac{2\pi n}{L} ,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>&nbsp;&nbsp;&nbsp;&nbsp;使用汉明窗:加窗的过程，实际上是在时域上将信号截断，窗函数与信号在时域相乘，就等于对应的频域表示进行卷积(*)，矩形窗主瓣窄，但是旁瓣较大（红色部分），将其与原信号的频域表示进行卷积，就会导致频率泄漏</p>
+<script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{0.54-0.46\cos\frac{2\pi n}{L} ,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>&nbsp;&nbsp;&nbsp;&nbsp;使用汉明窗:加窗的过程，实际上是在时域上将信号截断，窗函数与信号在时域相乘，就等于对应的频域表示进行卷积(*)，矩形窗主瓣窄，但是旁瓣较大，将其与原信号的频域表示进行卷积，就会导致频率泄漏</p>
 <h3 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;将上一步分帧之后的语音帧，通过快速傅里叶变换由时域变换到频域，取DFT系数的模，得到谱特征,在此不做详细描述，可参考下列文章(压箱底系列)<br>&nbsp;&nbsp;&nbsp;&nbsp;DFT: <a href="https://zhuanlan.zhihu.com/p/77347644" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/77347644</a><br>&nbsp;&nbsp;&nbsp;&nbsp;C语言-FFT蝶形运算：<a href="https://zhuanlan.zhihu.com/p/135259438" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/135259438</a><br>&nbsp;&nbsp;&nbsp;&nbsp;傅里叶变换的意义: <a href="https://blog.csdn.net/guyuealian/article/details/72817527" target="_blank" rel="noopener">https://blog.csdn.net/guyuealian/article/details/72817527</a><br>&nbsp;&nbsp;&nbsp;&nbsp;复数的物理意义: <a href="https://www.zhihu.com/question/23234701" target="_blank" rel="noopener">https://www.zhihu.com/question/23234701</a><br>&nbsp;&nbsp;&nbsp;&nbsp;信号频域与时域的区别:<a href="https://www.zhihu.com/question/21817515" target="_blank" rel="noopener">https://www.zhihu.com/question/21817515</a></p>
 <h3 id="FBank"><a href="#FBank" class="headerlink" title="FBank"></a>FBank</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;DFT得到了每个频带上信号的能量，但是人耳对频率的感知不是等间隔的，近似于对数函数</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;将线性频率转换为梅尔频率，梅尔频率和线性频率转换关系</p>
@@ -475,7 +475,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -488,7 +488,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">tags</span>
                 
               </div>
