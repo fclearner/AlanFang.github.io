@@ -89,7 +89,7 @@
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/preprocess_flow.png">
 <meta property="og:image" content="http://yoursite.com/2021/08/24/ASR-preprocess/mel_filter.png">
-<meta property="og:updated_time" content="2021-08-29T08:47:48.983Z">
+<meta property="og:updated_time" content="2021-08-30T08:34:39.150Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ASR-preprocess">
 <meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;语音信号预处理相关流程简介, 包括预加重、分帧加窗、DFT、FBank等">
@@ -340,7 +340,7 @@
 <h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;预加重是一个一阶高通滤波器，给定时域输入信号$x[n]$,预加重之后的信号为</p>
 <script type="math/tex; mode=display">y[n] = x[n] - \alpha x[n-1], \alpha \in [0.9, 1.0]</script><p>&nbsp;&nbsp;&nbsp;&nbsp;当信号为低频信号时，x变化较慢，$x[n]$与$x[n-1]$较为接近，低频信号的幅度会被大大抑制，同理，可保证高频信号特征的传递。</p>
 <h3 id="分帧加窗"><a href="#分帧加窗" class="headerlink" title="分帧加窗"></a>分帧加窗</h3><h4 id="Question-为什么需要分帧？"><a href="#Question-为什么需要分帧？" class="headerlink" title="Question:为什么需要分帧？"></a>Question:为什么需要分帧？</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;1、语音信号为非平稳信号，统计属性随时间变化。<br>&nbsp;&nbsp;&nbsp;&nbsp;2、语音信号同时具有短时平稳特性，一个声母/韵母的发音往往持续几十到几百毫秒。<br>&nbsp;&nbsp;&nbsp;&nbsp;3、语音识别以较小发音单元的识别进行，通常为音素、字或字节，需要滑动窗来提取短时片段。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;对于采样率为16kHz的信号，帧长、帧移一般为25ms、10ms，即400和160个采样点<br>&nbsp;&nbsp;&nbsp;&nbsp;帧长是一个窗口的长度，帧移是连续两帧之间重叠的部分(overlap)。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;对于采样率为16kHz的信号，帧长、帧移一般为25ms、10ms，即400和160个采样点<br>&nbsp;&nbsp;&nbsp;&nbsp;帧长是一个窗口的长度，帧移是帧长减去连续两帧之间重叠的部分(overlap)。</p>
 <h4 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h4><p>&nbsp;&nbsp;&nbsp;&nbsp;分帧的过程，在时域上，即用一个窗函数和原始信号进行相乘:</p>
 <script type="math/tex; mode=display">y[n] = w[n]x[n]</script><p>$w[n]$称为窗函数，常用的窗函数有<br>矩形窗：</p>
 <script type="math/tex; mode=display">w[n]=\left\{ \begin{aligned}{1,n\in [0,L-1] \\ 0,otherwise}\end{aligned}\right.</script><p>汉明窗(Hamming):</p>

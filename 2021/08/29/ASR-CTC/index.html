@@ -88,7 +88,7 @@
 <meta property="og:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC.png">
-<meta property="og:updated_time" content="2021-08-29T09:06:06.433Z">
+<meta property="og:updated_time" content="2021-08-30T08:30:39.772Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ASR-CTC">
 <meta name="twitter:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。">
@@ -334,8 +334,13 @@
       
         <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。<br><a id="more"></a></p>
 <h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC的工作原理如下图所示[1]:<br><img src="/2021/08/29/ASR-CTC/CTC.png" alt><br>&nbsp;&nbsp;&nbsp;&nbsp;以ASR为例，给定语音信号输入序列$X=[x_1, x_2,…, x_T]$，输出序列记为$Y=[y_1, y_2, …, y_U]$，当前需要找到$X$到$Y$的精确映射。<br>&nbsp;&nbsp;&nbsp;&nbsp;因以下几点的存在使得寻找映射的工作比较困难：<br>1)X和Y是可变的序列<br>2)X和Y的长度比率不是固定的<br>3)X和Y的对应关系事先无法确定<br>&nbsp;&nbsp;&nbsp;&nbsp;CTC不仅解决了以上的问题，还基于给定的输入序列$X$得出了$Y$的概率分布，可通过使用该概率分布推断可能的输出或评估输出的概率。<br>&nbsp;&nbsp;&nbsp;&nbsp;目标：<br>1)损失函数:驱使概率分布更接近准确的输出，计算Y在给定输入X下的概率分布($P(Y|X)$)<br>2)推论:最大化$P(Y|X)$，即</p>
-<script type="math/tex; mode=display">Y^* = \arg\max_{Y}P(Y|X)</script><h2 id="时序对齐"><a href="#时序对齐" class="headerlink" title="时序对齐"></a>时序对齐</h2><p>(待更新…)</p>
-<h2 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h2><h2 id="推论"><a href="#推论" class="headerlink" title="推论"></a>推论</h2><h2 id="CTC与HMM"><a href="#CTC与HMM" class="headerlink" title="CTC与HMM"></a>CTC与HMM</h2><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1] <a href="https://distill.pub/2017/ctc/" target="_blank" rel="noopener">https://distill.pub/2017/ctc/</a> Sequence Modeling With CTC</p>
+<script type="math/tex; mode=display">Y^* = \arg\max_{Y}P(Y|X)</script><h2 id="时序对齐"><a href="#时序对齐" class="headerlink" title="时序对齐"></a>时序对齐</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;论文举例 cat：</p>
+<script type="math/tex; mode=display">input(X): [x1, x2, x3, x4, x5, x6]\\
+alignment:  [ c,  c,  a,  a,  a,  t]\\
+output(Y):  [ c,      a,          t]</script><p>&nbsp;&nbsp;&nbsp;&nbsp;实现时序对齐的几个问题:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)输入和输出可能无法完全对应，比如输入有长时间的静音<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)[h,h,e,l,l,l,o]可能会被识别成helo，实际为hello</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;为实现时序对齐，解决上述问题，论文提出的方案(remarkable):</p>
+<script type="math/tex; mode=display">引入空白字符\epsilon</script><p>&nbsp;&nbsp;&nbsp;&nbsp;作用是指代静音，区分字符相似的单词(如hello和helo)<br>&nbsp;&nbsp;&nbsp;&nbsp;基于此，hello的输入序列可以表示为[h,h,e,$\epsilon$,$\epsilon$,l,l,l,$\epsilon$,l,l,o]，去除重复字符后为[h,e,$\epsilon$,l,$\epsilon$,l,o]，去除静音字符后表示为[h,e,l,l,o]</p>
+<h2 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h2><h2 id="推论"><a href="#推论" class="headerlink" title="推论"></a>推论</h2><h2 id="CTC与HMM"><a href="#CTC与HMM" class="headerlink" title="CTC与HMM"></a>CTC与HMM</h2><h2 id="CTC缺陷"><a href="#CTC缺陷" class="headerlink" title="CTC缺陷"></a>CTC缺陷</h2><h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1] <a href="https://distill.pub/2017/ctc/" target="_blank" rel="noopener">https://distill.pub/2017/ctc/</a> Sequence Modeling With CTC</p>
 
       
     </div>
@@ -502,7 +507,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时序对齐"><span class="nav-number">3.</span> <span class="nav-text">时序对齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数"><span class="nav-number">4.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#推论"><span class="nav-number">5.</span> <span class="nav-text">推论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTC与HMM"><span class="nav-number">6.</span> <span class="nav-text">CTC与HMM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">7.</span> <span class="nav-text">References</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原理"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时序对齐"><span class="nav-number">3.</span> <span class="nav-text">时序对齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数"><span class="nav-number">4.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#推论"><span class="nav-number">5.</span> <span class="nav-text">推论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTC与HMM"><span class="nav-number">6.</span> <span class="nav-text">CTC与HMM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTC缺陷"><span class="nav-number">7.</span> <span class="nav-text">CTC缺陷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
             
 
           </div>
