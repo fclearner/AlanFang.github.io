@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/AlanFangicon32X32.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/AlanFangicon16X16.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ASR,ASR-Classic,Loss," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ASR-CTC">
+<meta property="og:url" content="http://yoursite.com/2021/08/29/ASR-CTC/index.html">
+<meta property="og:site_name" content="AlanFangBlog">
+<meta property="og:description" content="前言&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。">
+<meta property="og:locale">
+<meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC.png">
+<meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC_dp.png">
+<meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC_compute.png">
+<meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC_loss.png">
+<meta property="og:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC_loss_def.png">
+<meta property="article:published_time" content="2021-08-29T06:46:28.000Z">
+<meta property="article:modified_time" content="2021-09-08T09:53:50.833Z">
+<meta property="article:author" content="Alan Fang">
+<meta property="article:tag" content="ASR">
+<meta property="article:tag" content="ASR-Classic">
+<meta property="article:tag" content="Loss">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2021/08/29/ASR-CTC/CTC.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/08/29/ASR-CTC/"/>
+
+
+
+
+
+  <title>ASR-CTC | AlanFangBlog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">AlanFangBlog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/08/29/ASR-CTC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="AlanFangBlog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ASR-CTC</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-08-29T14:46:28+08:00">
+                2021-08-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/29/ASR-CTC/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/08/29/ASR-CTC/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/08/29/ASR-CTC/" class="leancloud_visitors" data-flag-title="ASR-CTC">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">Visitors&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC(Connectionist Temporal Classification)可以在未对输入序列与输出标签进行FA(Force Alignment)的情况下完成时序对齐及分类工作，主要用于语音识别及手写识别[1]。<br><span id="more"></span></p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC的工作原理如下图所示[1]:</p>
+<p><img src="/2021/08/29/ASR-CTC/CTC.png" alt></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;以ASR为例，给定语音信号输入序列$X=[x_1, x_2,…, x_T]$，输出序列记为$Y=[y_1, y_2, …, y_U]$，当前需要找到$X$到$Y$的精确映射。<br>&nbsp;&nbsp;&nbsp;&nbsp;因以下几点的存在使得寻找映射的工作比较困难：<br>1)X和Y是可变的序列<br>2)X和Y的长度比率不是固定的<br>3)X和Y的对应关系事先无法确定<br>&nbsp;&nbsp;&nbsp;&nbsp;CTC不仅解决了以上的问题，还基于给定的输入序列$X$得出了$Y$的概率分布，可通过使用该概率分布推断可能的输出或评估输出的概率。<br>&nbsp;&nbsp;&nbsp;&nbsp;目标：<br>1)损失函数:驱使概率分布更接近准确的输出，计算Y在给定输入X下的概率分布($P(Y|X)$)<br>2)推论:最大化$P(Y|X)$，即</p>
+<script type="math/tex; mode=display">Y^* = \arg\max_{Y}P(Y|X)</script><h2 id="时序对齐"><a href="#时序对齐" class="headerlink" title="时序对齐"></a>时序对齐</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;论文举例 cat：</p>
+<script type="math/tex; mode=display">input(X): [x1, x2, x3, x4, x5, x6]\\
+alignment:  [ c,  c,  a,  a,  a,  t]\\
+output(Y):  [ c,      a,          t]</script><p>&nbsp;&nbsp;&nbsp;&nbsp;实现时序对齐的几个问题:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1)输入和输出可能无法完全对应，比如输入有长时间的静音<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2)[h,h,e,l,l,l,o]可能会被识别成helo，实际为hello</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;为实现时序对齐，解决上述问题，论文提出的方案(remarkable):</p>
+<script type="math/tex; mode=display">引入空白字符\epsilon</script><p>&nbsp;&nbsp;&nbsp;&nbsp;作用是指代静音，区分字符相似的单词(如hello和helo)<br>&nbsp;&nbsp;&nbsp;&nbsp;基于此，hello的输入序列可以表示为[h,h,e,$\epsilon$,$\epsilon$,l,l,l,$\epsilon$,l,l,o]，去除重复字符后为[h,e,$\epsilon$,l,$\epsilon$,l,o]，去除空白字符后表示为[h,e,l,l,o]</p>
+<h2 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC使用RNN作为训练网络，在每一步都会生成输出序列的概率分布，其中对于每一对$(X,Y)$，其条件概率为：</p>
+<script type="math/tex; mode=display">p(Y|X) = \sum_{A\in A_{X,Y}} {\prod_{t=1}^T p_t(a_t|X)}</script><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC loss的计算十分费时，论文使用动态规划对计算过程进行了优化，合并同一time step的相同输出，如下图所示:<br><img src="/2021/08/29/ASR-CTC/CTC_dp.png" alt><br>&nbsp;&nbsp;&nbsp;&nbsp;CTC算法的预测序列为</p>
+<script type="math/tex; mode=display">Z = [\epsilon, y_1, \epsilon, y_2, \epsilon, y_3, ..., \epsilon, y_U, \epsilon]</script><p>&nbsp;&nbsp;&nbsp;&nbsp;当前字符为空白字符$\epsilon$时，下一个字符有两种可能:空白字符或$Z$序列中的下一个字符。<br>&nbsp;&nbsp;&nbsp;&nbsp;当前字符不是空白字符时，下一个字符有三种可能:当前字符、空白字符或$Z$序列中的下一个字符。<br>&nbsp;&nbsp;&nbsp;&nbsp;下图为CTC的计算过程:<br><img src="/2021/08/29/ASR-CTC/CTC_compute.png" alt></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;基于动态规划，可用前向和后向概率计算CTC的loss，计算过程可参考[2]。<br>&nbsp;&nbsp;&nbsp;&nbsp;对于训练集D，CTC的loss计算可归纳为下式:</p>
+<script type="math/tex; mode=display">\sum_{(X,Y)\in D}{-\log p(Y|X)}</script><p>&nbsp;&nbsp;&nbsp;&nbsp;参考博客[3]，CTC的loss函数求解如下图所示:<br><img src="/2021/08/29/ASR-CTC/CTC_loss.png" alt><br>&nbsp;&nbsp;&nbsp;&nbsp;其中的z就是博客前半部分讨论的y，<br><img src="/2021/08/29/ASR-CTC/CTC_loss_def.png" alt></p>
+<h2 id="推论"><a href="#推论" class="headerlink" title="推论"></a>推论</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;由于直接暴力计算，$𝒑(𝒛│𝒙)$的复杂度非常高，论文中提及了greedy search和beam search两种方法[4]：<br>&nbsp;&nbsp;&nbsp;&nbsp;greedy search:每个时间片均取该时间片概率最高的节点作为输出<br>&nbsp;&nbsp;&nbsp;&nbsp;beam search:Beam Search是寻找全局最优值和Greedy Search在查找时间和模型精度的一个折中</p>
+<h2 id="CTC与HMM"><a href="#CTC与HMM" class="headerlink" title="CTC与HMM"></a>CTC与HMM</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;作者借鉴HMM的Forward-Backward算法思路，利用动态规划算法求解[3]。</p>
+<h2 id="CTC缺陷"><a href="#CTC缺陷" class="headerlink" title="CTC缺陷"></a>CTC缺陷</h2><p>&nbsp;&nbsp;&nbsp;&nbsp;CTC假设每个时间片之间是相互独立，这种假设使输出丢失了时间片之间的语义信息，因此在CTC后部添加语言模型可有一定的优化效果。</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><p>[1] <a target="_blank" rel="noopener" href="https://distill.pub/2017/ctc/">https://distill.pub/2017/ctc/</a> Sequence Modeling With CTC<br>[2] <a target="_blank" rel="noopener" href="https://xiaodu.io/ctc-explained/">https://xiaodu.io/ctc-explained/</a><br>[3] <a target="_blank" rel="noopener" href="https://xiaodu.io/ctc-explained/">https://xiaodu.io/ctc-explained/</a><br>[4] <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/42719047">https://zhuanlan.zhihu.com/p/42719047</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ASR/" rel="tag"># ASR</a>
+          
+            <a href="/tags/ASR-Classic/" rel="tag"># ASR-Classic</a>
+          
+            <a href="/tags/Loss/" rel="tag"># Loss</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/08/24/ASR-CMVN/" rel="next" title="ASR-CMVN">
+                <i class="fa fa-chevron-left"></i> ASR-CMVN
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/08/30/wechat-AI/" rel="prev" title="wechat-AI">
+                wechat-AI <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E5%AF%B9%E9%BD%90"><span class="nav-number">3.</span> <span class="nav-text">时序对齐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E8%AE%BA"><span class="nav-number">5.</span> <span class="nav-text">推论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTC%E4%B8%8EHMM"><span class="nav-number">6.</span> <span class="nav-text">CTC与HMM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CTC%E7%BC%BA%E9%99%B7"><span class="nav-number">7.</span> <span class="nav-text">CTC缺陷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Alan Fang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '4TSz1t4vXIlKVJ2sL2AE70PY-gzGzoHsz',
+        appKey: '7M93zOpcGilqVvIpXhta3vMA',
+        placeholder: 'leave your comments if you have some ideas',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("4TSz1t4vXIlKVJ2sL2AE70PY-gzGzoHsz", "7M93zOpcGilqVvIpXhta3vMA");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
